@@ -6,6 +6,8 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <script src='https://kit.fontawesome.com/a076d05399.js' crossorigin='anonymous'></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
 
     <style>
         canvas {
@@ -56,11 +58,53 @@
             color: blue;
         }
 
+        /*working fine*/
+        /*#myCanvas {*/
+        /*max-width: 100%;*/
+        /*height: auto;*/
+        /*!*background-color: #FAF9F6;*!*/
+        /*background-color: #D3D3D3;*/
+        /*border: 3px solid #000; !* Add a border for clarity *!*/
+        /*}*/
+
+        /*material look*/
         #myCanvas {
             max-width: 100%;
             height: auto;
-            background-color: #FAF9F6;
-            border: 3px solid #000; /* Add a border for clarity */
+            background-color: #D3D3D3;
+            border: 3px solid #000;
+            box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.2); /* Add a box shadow for shading */
+        }
+
+    </style>
+
+    <style>
+        /* Style for the navigation spans */
+        .arrow {
+            cursor: pointer;
+            display: inline-block;
+            padding: 8px; /* Adjust padding as needed */
+            border-radius: 50%;
+            background-color: #ffffff; /* Background color for the icon */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+            transition: background-color 0.3s, transform 0.2s ease-in-out;
+        }
+
+        .arrow:hover {
+            background-color: #f0f0f0; /* Change background color on hover */
+            transform: scale(1.05); /* Add a slight scale effect on hover */
+        }
+
+        /* Style for the icon */
+        .arrow i {
+            font-size: 36px;
+            color: red;
+        }
+
+        /* Style for the monthYearText span */
+        #monthYearText {
+            font-size: 24px; /* Adjust font size as needed */
+            margin: 0 20px; /* Add spacing between the navigation elements */
         }
     </style>
 </head>
@@ -90,7 +134,7 @@
     </div>
 
 
-    <div >
+    <div>
         <div id="monthSelection" style="display: none;">
             <label for="monthSelect">Select Month:</label>
             <select id="monthSelect" onchange="handleMonthChange()"></select>
@@ -100,267 +144,273 @@
             <label for="yearInput">Enter Year:</label>
             <input type="number" id="yearInput" min="1900" max="2100" oninput="handleYearChange()"/>
         </div>
-        <div>
-            <span onclick="goToPreviousMonth()"><i class='fas fa-angle-right' style='font-size:24px'></i>&lt;</span>
+        <div class="col-sm-4" style=" text-align: center;">
+            <span onclick="goToPreviousMonth()"><i class='fas fa-angle-double-left'
+                                                   style='font-size:36px;color:red'></i></span>
             <span id="monthYearText"></span>
-            <span class="arrow" onclick="goToNextMonth()"><i class='fas fa-angle-left' style='font-size:24px'></i>&gt;</span>
+            <span class="arrow" onclick="goToNextMonth()"><i class='fas fa-angle-double-right'
+                                                             style='font-size:36px;color:red'></i>
+</span>
+            <!--</div>-->
+            <div>
+                <canvas id="myCanvas" width="500" height="400"></canvas>
+            </div>
+            <div class="col-sm-4" style="background-color:lavenderblush;">.col-sm-4</div>
         </div>
-        <div >
-            <canvas id="myCanvas" width="500" height="400"></canvas>
+    </div>
+
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <p id="modalDate"></p>
         </div>
-        <div class="col-sm-4" style="background-color:lavenderblush;">.col-sm-4</div>
     </div>
-</div>
 
+    <script>
+        document.getElementById('monthSelection').style.display = 'none';
+        document.getElementById('yearSelection').style.display = 'none';
 
-<div id="modal" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="closeModal()">&times;</span>
-        <p id="modalDate"></p>
-    </div>
-</div>
+        // Get the canvas element
+        var canvas = document.getElementById("myCanvas");
+        var ctx = canvas.getContext("2d");
 
-<script>
-    document.getElementById('monthSelection').style.display = 'none';
-    document.getElementById('yearSelection').style.display = 'none';
+        // Define the size of each cell
+        var cellWidth = canvas.width / 7;
+        var cellHeight = canvas.height / 6;
 
-    // Get the canvas element
-    var canvas = document.getElementById("myCanvas");
-    var ctx = canvas.getContext("2d");
+        // Define the abbreviated weekday names
+        var daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-    // Define the size of each cell
-    var cellWidth = canvas.width / 7;
-    var cellHeight = canvas.height / 6;
+        // Get the month selection and year input elements
+        var monthSelect = document.getElementById("monthSelect");
+        var yearInput = document.getElementById("yearInput");
 
-    // Define the abbreviated weekday names
-    var daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        // Initialize the selected month and year
+        var selectedMonth = null;
+        var selectedYear = null;
 
-    // Get the month selection and year input elements
-    var monthSelect = document.getElementById("monthSelect");
-    var yearInput = document.getElementById("yearInput");
+        // Array to store the random dates for highlighting
+        var randomDates = [];
 
-    // Initialize the selected month and year
-    var selectedMonth = null;
-    var selectedYear = null;
+        // Function to get the number of days in a month
+        function getDaysInMonth(month, year) {
+            return new Date(year, month + 1, 0).getDate();
+        }
 
-    // Array to store the random dates for highlighting
-    var randomDates = [];
-
-    // Function to get the number of days in a month
-    function getDaysInMonth(month, year) {
-        return new Date(year, month + 1, 0).getDate();
-    }
-
-    // Function to generate an array of 5 random dates within the selected month
-    function generateRandomDates() {
-        randomDates = [];
-        var numDays = getDaysInMonth(selectedMonth, selectedYear);
-        while (randomDates.length < 5) {
-            var randomDate = Math.floor(Math.random() * numDays) + 1;
-            if (!randomDates.includes(randomDate)) {
-                randomDates.push(randomDate);
+        // Function to generate an array of 5 random dates within the selected month
+        function generateRandomDates() {
+            randomDates = [];
+            var numDays = getDaysInMonth(selectedMonth, selectedYear);
+            while (randomDates.length < 5) {
+                var randomDate = Math.floor(Math.random() * numDays) + 1;
+                if (!randomDates.includes(randomDate)) {
+                    randomDates.push(randomDate);
+                }
             }
         }
-    }
 
-    // Function to draw the calendar
-    function drawCalendar() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // Function to draw the calendar
+        function drawCalendar() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Draw the top row with month and year
-        var monthName = new Date(selectedYear, selectedMonth).toLocaleString("default", {month: "long"});
-        var topRowText = monthName + " " + selectedYear;
-        var monthYearText = document.getElementById("monthYearText");
-        monthYearText.textContent = topRowText;
+            // Draw the top row with month and year
+            var monthName = new Date(selectedYear, selectedMonth).toLocaleString("default", {month: "long"});
+            var topRowText = monthName + " " + selectedYear;
+            var monthYearText = document.getElementById("monthYearText");
+            monthYearText.textContent = topRowText;
+            monthYearText.style.fontSize = "36px";
 
-        // Draw the days of the week
-        ctx.fillStyle = "#000000";
-        //ctx.fillStyle = "#1abc9c";
-        ctx.font = "bold 14px Arial";
-        ctx.textAlign = "center";
-        for (var i = 0; i < 7; i++) {
-            var x = i * cellWidth + cellWidth / 2;
-            console.log(x);
-
-            ctx.fillStyle = "#1abc9c";
-            //ctx.fillRect(col * cellWidth, row * cellHeight + 75, cellWidth, cellHeight);
-            ctx.fillRect(x - 35, 0, cellWidth, cellHeight);
-
+            // Draw the days of the week
             ctx.fillStyle = "#000000";
-            ctx.fillText(daysOfWeek[i], x, cellHeight / 2);
-        }
+            //ctx.fillStyle = "#1abc9c";
+            ctx.font = "bold 14px Arial";
+            ctx.textAlign = "center";
+            for (var i = 0; i < 7; i++) {
+                var x = i * cellWidth + cellWidth / 2;
+                console.log(x);
 
-        // Get the number of days in the selected month
-        var numDays = getDaysInMonth(selectedMonth, selectedYear);
+                // ctx.fillStyle = "#1abc9c";
+                // ctx.fillStyle = "#4ad3b7";
+                ctx.fillStyle = "cyan";
+                //ctx.fillRect(col * cellWidth, row * cellHeight + 75, cellWidth, cellHeight);
+                ctx.fillRect(x - 35, 0, cellWidth, cellHeight);
 
-        // Get the first day of the month (0 = Sunday, 1 = Monday, ...)
-        var firstDay = new Date(selectedYear, selectedMonth, 1).getDay();
+                ctx.fillStyle = "#000000";
+                ctx.fillText(daysOfWeek[i], x, cellHeight / 2);
+            }
 
-        // Draw the days of the month
-        ctx.font = "14px Arial";
-        ctx.textAlign = "center";
-        var dayCount = 1;
-        for (var row = 0; row < 6; row++) {
-            for (var col = 0; col < 7; col++) {
-                var x = col * cellWidth + cellWidth / 2;
-                var y = row * cellHeight + cellHeight / 2 + 75;
+            // Get the number of days in the selected month
+            var numDays = getDaysInMonth(selectedMonth, selectedYear);
 
-                if (row === 0 && col < firstDay) {
-                    continue;
-                }
+            // Get the first day of the month (0 = Sunday, 1 = Monday, ...)
+            var firstDay = new Date(selectedYear, selectedMonth, 1).getDay();
 
-                if (dayCount <= numDays) {
-                    var currentDate = dayCount;
-                    var isRandomDate = randomDates.includes(currentDate);
+            // Draw the days of the month
+            ctx.font = "14px Arial";
+            ctx.textAlign = "center";
+            var dayCount = 1;
+            for (var row = 0; row < 6; row++) {
+                for (var col = 0; col < 7; col++) {
+                    var x = col * cellWidth + cellWidth / 2;
+                    var y = row * cellHeight + cellHeight / 2 + 75;
 
-                    // Fill the entire cell with red color if it contains a random date
-                    if (isRandomDate) {
-                        ctx.fillStyle = "red";
-                        //ctx.fillRect(col * cellWidth, row * cellHeight + 75, cellWidth, cellHeight);
-                        ctx.fillRect(col * cellWidth, row * cellHeight + 75, cellWidth, cellHeight);
+                    if (row === 0 && col < firstDay) {
+                        continue;
                     }
 
-                    ctx.fillStyle = "#000000";
-                    ctx.fillText(currentDate.toString(), x, y);
+                    if (dayCount <= numDays) {
+                        var currentDate = dayCount;
+                        var isRandomDate = randomDates.includes(currentDate);
 
-                    if (isRandomDate) {
-                        // Add event listener for cell click
-                        canvas.addEventListener("click", handleDateClick);
+                        // Fill the entire cell with red color if it contains a random date
+                        if (isRandomDate) {
+                            ctx.fillStyle = "red";
+                            //ctx.fillRect(col * cellWidth, row * cellHeight + 75, cellWidth, cellHeight);
+                            ctx.fillRect(col * cellWidth, row * cellHeight + 75, cellWidth, cellHeight);
+                        }
+
+                        ctx.fillStyle = "#000000";
+                        ctx.fillText(currentDate.toString(), x, y);
+
+                        if (isRandomDate) {
+                            // Add event listener for cell click
+                            canvas.addEventListener("click", handleDateClick);
+                        }
+
+                        dayCount++;
                     }
-
-                    dayCount++;
                 }
             }
         }
-    }
 
-    // Function to handle month selection change
-    function handleMonthChange() {
-        selectedMonth = parseInt(monthSelect.value);
-        generateRandomDates();
-        drawCalendar();
-    }
+        // Function to handle month selection change
+        function handleMonthChange() {
+            selectedMonth = parseInt(monthSelect.value);
+            generateRandomDates();
+            drawCalendar();
+        }
 
-    // Function to handle year input change
-    function handleYearChange() {
-        selectedYear = parseInt(yearInput.value);
-        generateRandomDates();
-        drawCalendar();
-    }
+        // Function to handle year input change
+        function handleYearChange() {
+            selectedYear = parseInt(yearInput.value);
+            generateRandomDates();
+            drawCalendar();
+        }
 
-    // Function to handle date click event
-    function handleDateClick(event) {
-        var rect = canvas.getBoundingClientRect();
-        var mouseX = event.clientX - rect.left;
-        var mouseY = event.clientY - rect.top;
+        // Function to handle date click event
+        function handleDateClick(event) {
+            var rect = canvas.getBoundingClientRect();
+            var mouseX = event.clientX - rect.left;
+            var mouseY = event.clientY - rect.top;
 
-        var col = Math.floor(mouseX / cellWidth);
-        var row = Math.floor((mouseY - 75) / cellHeight);
+            var col = Math.floor(mouseX / cellWidth);
+            var row = Math.floor((mouseY - 75) / cellHeight);
 
-        var firstDay = new Date(selectedYear, selectedMonth, 1).getDay();
-        var clickedDate = row * 7 + col - firstDay + 1;
+            var firstDay = new Date(selectedYear, selectedMonth, 1).getDay();
+            var clickedDate = row * 7 + col - firstDay + 1;
 
-        if (clickedDate >= 1 && clickedDate <= getDaysInMonth(selectedMonth, selectedYear) && randomDates.includes(clickedDate)) {
+            if (clickedDate >= 1 && clickedDate <= getDaysInMonth(selectedMonth, selectedYear) && randomDates.includes(clickedDate)) {
+                var modal = document.getElementById("modal");
+                var modalDate = document.getElementById("modalDate");
+                modalDate.textContent = clickedDate + " " + new Date(selectedYear, selectedMonth).toLocaleString("default", {month: "long"});
+                modal.style.display = "block";
+            }
+        }
+
+        // Function to close the modal
+        function closeModal() {
             var modal = document.getElementById("modal");
-            var modalDate = document.getElementById("modalDate");
-            modalDate.textContent = clickedDate + " " + new Date(selectedYear, selectedMonth).toLocaleString("default", {month: "long"});
-            modal.style.display = "block";
+            modal.style.display = "none";
         }
-    }
 
-    // Function to close the modal
-    function closeModal() {
-        var modal = document.getElementById("modal");
-        modal.style.display = "none";
-    }
-
-    // Function to go to the next month
-    function goToNextMonth() {
-        if (selectedMonth < 11) {
-            selectedMonth++;
-        } else {
-            selectedMonth = 0;
-            selectedYear++;
+        // Function to go to the next month
+        function goToNextMonth() {
+            if (selectedMonth < 11) {
+                selectedMonth++;
+            } else {
+                selectedMonth = 0;
+                selectedYear++;
+            }
+            monthSelect.value = selectedMonth;
+            yearInput.value = selectedYear;
+            generateRandomDates();
+            drawCalendar();
         }
+
+        // Function to go to the previous month
+        function goToPreviousMonth() {
+            if (selectedMonth > 0) {
+                selectedMonth--;
+            } else {
+                selectedMonth = 11;
+                selectedYear--;
+            }
+            monthSelect.value = selectedMonth;
+            yearInput.value = selectedYear;
+            generateRandomDates();
+            drawCalendar();
+        }
+
+        // Populate the month selection dropdown
+        for (var i = 0; i < 12; i++) {
+            var option = document.createElement("option");
+            option.value = i;
+            option.text = new Date(2000, i).toLocaleString("default", {month: "long"});
+            monthSelect.appendChild(option);
+        }
+
+        // Set the initial month and year to the current date
+        var currentDate = new Date();
+        selectedMonth = currentDate.getMonth();
+        selectedYear = currentDate.getFullYear();
+
+        // Set the initial values of the month selection and year input
         monthSelect.value = selectedMonth;
         yearInput.value = selectedYear;
+
+        // Generate initial random dates
         generateRandomDates();
+
+        // Draw the initial calendar
         drawCalendar();
-    }
-
-    // Function to go to the previous month
-    function goToPreviousMonth() {
-        if (selectedMonth > 0) {
-            selectedMonth--;
-        } else {
-            selectedMonth = 11;
-            selectedYear--;
-        }
-        monthSelect.value = selectedMonth;
-        yearInput.value = selectedYear;
-        generateRandomDates();
-        drawCalendar();
-    }
-
-    // Populate the month selection dropdown
-    for (var i = 0; i < 12; i++) {
-        var option = document.createElement("option");
-        option.value = i;
-        option.text = new Date(2000, i).toLocaleString("default", {month: "long"});
-        monthSelect.appendChild(option);
-    }
-
-    // Set the initial month and year to the current date
-    var currentDate = new Date();
-    selectedMonth = currentDate.getMonth();
-    selectedYear = currentDate.getFullYear();
-
-    // Set the initial values of the month selection and year input
-    monthSelect.value = selectedMonth;
-    yearInput.value = selectedYear;
-
-    // Generate initial random dates
-    generateRandomDates();
-
-    // Draw the initial calendar
-    drawCalendar();
 
 
-    ///////////////////////new-------------------
-    // Function to draw a shadow for the 3D effect
-    // function drawShadow(canvas) {
-    //     var ctx = canvas.getContext('2d');
-    //     var canvasWidth = canvas.width;
-    //     var canvasHeight = canvas.height;
-    //
-    //     ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-    //     ctx.shadowBlur = 10;
-    //
-    //     ctx.beginPath();
-    //     ctx.moveTo(10, 10);
-    //     ctx.lineTo(canvasWidth - 10, 10);
-    //     ctx.lineTo(canvasWidth - 30, canvasHeight - 10);
-    //     ctx.lineTo(30, canvasHeight - 10);
-    //     ctx.closePath();
-    //
-    //     ctx.fillStyle = 'white';
-    //     ctx.fill();
-    // }
+        ///////////////////////new-------------------
+        // Function to draw a shadow for the 3D effect
+        // function drawShadow(canvas) {
+        //     var ctx = canvas.getContext('2d');
+        //     var canvasWidth = canvas.width;
+        //     var canvasHeight = canvas.height;
+        //
+        //     ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+        //     ctx.shadowBlur = 10;
+        //
+        //     ctx.beginPath();
+        //     ctx.moveTo(10, 10);
+        //     ctx.lineTo(canvasWidth - 10, 10);
+        //     ctx.lineTo(canvasWidth - 30, canvasHeight - 10);
+        //     ctx.lineTo(30, canvasHeight - 10);
+        //     ctx.closePath();
+        //
+        //     ctx.fillStyle = 'white';
+        //     ctx.fill();
+        // }
 
-    // Function to set canvas size based on window size
-    // function resizeCanvas() {
-    //     var canvas = document.getElementById('myCanvas');
-    //     var container = document.querySelector('.container');
-    //     canvas.width = container.; // Set canvas width to match container
-    //     canvas.height = container.clientHeight; // Set canvas height to match container
-    //     drawShadow(canvas); // Redraw the shadow when resizing
-    // }
+        // Function to set canvas size based on window size
+        // function resizeCanvas() {
+        //     var canvas = document.getElementById('myCanvas');
+        //     var container = document.querySelector('.container');
+        //     canvas.width = container.; // Set canvas width to match container
+        //     canvas.height = container.clientHeight; // Set canvas height to match container
+        //     drawShadow(canvas); // Redraw the shadow when resizing
+        // }
 
-    // Call the resizeCanvas function when the window is resized
-    // window.addEventListener('resize', resizeCanvas);
+        // Call the resizeCanvas function when the window is resized
+        // window.addEventListener('resize', resizeCanvas);
 
-    // Call it once initially to set the canvas size and draw the shadow
-    // resizeCanvas();
-</script>
+        // Call it once initially to set the canvas size and draw the shadow
+        // resizeCanvas();
+    </script>
 </body>
 </html>
