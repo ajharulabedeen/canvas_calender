@@ -106,6 +106,44 @@
             font-size: 24px; /* Adjust font size as needed */
             margin: 0 20px; /* Add spacing between the navigation elements */
         }
+
+        /* Define a base font size for small screens */
+        .arrow i,
+        #monthYearText {
+            font-size: 12px;
+        }
+
+        /* Use media queries to adjust font size for larger screens */
+        @media screen and (min-width: 576px) {
+            .arrow i,
+            #monthYearText {
+                font-size: 18px;
+            }
+        }
+
+        @media screen and (min-width: 768px) {
+            .arrow i,
+            #monthYearText {
+                font-size: 24px;
+            }
+        }
+
+        @media screen and (min-width: 992px) {
+            .arrow i,
+            #monthYearText {
+                font-size: 30px;
+            }
+        }
+
+        @media screen and (min-width: 1200px) {
+            .arrow i,
+            #monthYearText {
+                font-size: 36px; /* Maximum size for larger screens */
+            }
+        }
+
+        Add any other responsive styles as needed
+
     </style>
 </head>
 <body>
@@ -144,18 +182,16 @@
             <label for="yearInput">Enter Year:</label>
             <input type="number" id="yearInput" min="1900" max="2100" oninput="handleYearChange()"/>
         </div>
-        <div class="col-sm-4" style=" text-align: center;">
+        <div class="col-md-4" style=" text-align: center;">
             <span onclick="goToPreviousMonth()"><i class='fas fa-angle-double-left'
                                                    style='font-size:36px;color:red'></i></span>
             <span id="monthYearText"></span>
             <span class="arrow" onclick="goToNextMonth()"><i class='fas fa-angle-double-right'
-                                                             style='font-size:36px;color:red'></i>
-</span>
-            <!--</div>-->
+                                                             style='font-size:36px;color:red'></i></span>
             <div>
                 <canvas id="myCanvas" width="500" height="400"></canvas>
             </div>
-            <div class="col-sm-4" style="background-color:lavenderblush;">.col-sm-4</div>
+            <div class="col-md-4" style="background-color:lavenderblush;">.col-sm-4</div>
         </div>
     </div>
 
@@ -237,6 +273,7 @@
                 ctx.fillRect(x - 35, 0, cellWidth, cellHeight);
 
                 ctx.fillStyle = "#000000";
+                ctx.font = "24px Arial";
                 ctx.fillText(daysOfWeek[i], x, cellHeight / 2);
             }
 
@@ -247,7 +284,7 @@
             var firstDay = new Date(selectedYear, selectedMonth, 1).getDay();
 
             // Draw the days of the month
-            ctx.font = "14px Arial";
+            ctx.font = "24px Arial";
             ctx.textAlign = "center";
             var dayCount = 1;
             for (var row = 0; row < 6; row++) {
