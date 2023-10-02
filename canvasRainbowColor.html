@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>HTML Canvas Table</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+<canvas id="myCanvas" width="500" height="300"></canvas>
+<script>
+    // Get the canvas element
+    var canvas = document.getElementById("myCanvas");
+    var ctx = canvas.getContext("2d");
+
+    // Define the size of each cell
+    var cellWidth = canvas.width / 7;
+    var cellHeight = canvas.height / 5;
+
+    // Function to generate a random rainbow color
+    function getRandomColor() {
+        var letters = "0123456789ABCDEF";
+        var color = "#";
+        for (var i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
+
+    // Create a 2D array to store the cell colors
+    var cellColors = [];
+    for (var i = 0; i < 5; i++) {
+        cellColors[i] = [];
+        for (var j = 0; j < 7; j++) {
+            cellColors[i][j] = "#ffffff"; // Set default color to white
+        }
+    }
+
+    // Function to draw the table
+    function drawTable() {
+        //no effect
+        // ctx.clearRect(100, 200, canvas.width, canvas.height);
+
+        for (var i = 0; i < 5; i++) {
+            for (var j = 0; j < 7; j++) {
+                var x = j * cellWidth;
+                var y = i * cellHeight;
+
+                ctx.fillStyle = cellColors[i][j];
+                if(i==2){
+                    ctx.fillRect(x+50, y, cellWidth, cellHeight);
+                }else {
+                    ctx.fillRect(x, y, cellWidth, cellHeight);
+                }
+
+                // Generate a random index between 0 and 6
+                const randomIndex = Math.floor(Math.random() * 7);
+
+                // Assign the random color to ctx.strokeStyle
+                ctx.strokeStyle = rainbowColors2[randomIndex];
+
+                // ctx.strokeStyle = "#ffda47";
+                ctx.strokeRect(x, y, cellWidth, cellHeight);
+            }
+        }
+    }
+
+    const rainbowColors2 = ["#ff0000", "#ff7f00", "#ffff00", "#00ff00", "#0000ff", "#4b0082", "#8b00ff"];
+
+
+    // Function to handle cell click event
+    function handleCellClick(event) {
+        var rect = canvas.getBoundingClientRect();
+        var mouseX = event.clientX - rect.left;
+        var mouseY = event.clientY - rect.top;
+
+        var clickedRow = Math.floor(mouseY / cellHeight);
+        var clickedColumn = Math.floor(mouseX / cellWidth);
+
+        alert("Cell clicked: Row " + (clickedRow + 1) + ", Column " + (clickedColumn + 1));
+    }
+
+    // Add event listener for cell click
+    canvas.addEventListener("click", handleCellClick);
+
+    // Update the cell colors with random rainbow colors for 7 cells
+    var rainbowColors = [
+        "#FF0000", // Red
+        "#FF7F00", // Orange
+        "#FFFF00", // Yellow
+        "#00FF00", // Green
+        "#0000FF", // Blue
+        "#4B0082", // Indigo
+        "#8B00FF"  // Violet
+    ];
+
+    var randomIndex;
+    for (var i = 0; i < 7; i++) {
+        randomIndex = Math.floor(Math.random() * 5); // Generate random row index
+        cellColors[randomIndex][i] = rainbowColors[i];
+    }
+
+    // Draw the initial table
+    drawTable();
+</script>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>HTML Canvas Table</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="myCanvas" width="500" height="300"></canvas>
+    <script>
+        // Get the canvas element
+        var canvas = document.getElementById("myCanvas");
+        var ctx = canvas.getContext("2d");
+
+        // Define the size of each cell
+        var cellWidth = canvas.width / 7;
+        var cellHeight = canvas.height / 5;
+
+        // Define the colors
+        var defaultColor = "#ffffff";
+        var redColor = "#ff0000";
+
+        // Create a 2D array to store the cell colors
+        var cellColors = [];
+        for (var i = 0; i < 5; i++) {
+            cellColors[i] = [];
+            for (var j = 0; j < 7; j++) {
+                cellColors[i][j] = defaultColor;
+            }
+        }
+
+        // Function to draw the table
+        function drawTable() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (var i = 0; i < 5; i++) {
+                for (var j = 0; j < 7; j++) {
+                    var x = j * cellWidth;
+                    var y = i * cellHeight;
+
+                    ctx.fillStyle = cellColors[i][j];
+                    ctx.fillRect(x, y, cellWidth, cellHeight);
+
+                    ctx.strokeStyle = "#000000";
+                    ctx.strokeRect(x, y, cellWidth, cellHeight);
+                }
+            }
+        }
+
+        // Function to handle cell click event
+        function handleCellClick(event) {
+            var rect = canvas.getBoundingClientRect();
+            var mouseX = event.clientX - rect.left;
+            var mouseY = event.clientY - rect.top;
+
+            var clickedRow = Math.floor(mouseY / cellHeight);
+            var clickedColumn = Math.floor(mouseX / cellWidth);
+
+            alert("Cell clicked: Row " + (clickedRow + 1) + ", Column " + (clickedColumn + 1));
+        }
+
+        // Add event listener for cell click
+        canvas.addEventListener("click", handleCellClick);
+
+        // Update the cell colors based on the condition
+        for (var i = 0; i < 5; i++) {
+            for (var j = 0; j < 7; j++) {
+                if ((i + 1) % 4 === 0) {
+                    cellColors[i][j] = redColor;
+                }
+            }
+        }
+
+        // Draw the initial table
+        drawTable();
+    </script>
+</body>
+</html>
