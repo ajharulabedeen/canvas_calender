@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+<!--start: canvas calender-->
+<style>
+    /*<!--  no need cause it is adding border to all canvas -- >*/
+    /*canvas {*/
+    /*border: 1px solid black;*/
+    /*}*/
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.8);
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: 10% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+    }
+
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .arrow {
+        font-size: 20px;
+        cursor: pointer;
+    }
+
+    .arrow:hover {
+        color: blue;
+    }
+
+    /*material look*/
+    #calanderCanvas {
+        max-width: 100%;
+        height: auto;
+        /*background-color: #D3D3D3;*/
+        background-color: lightgrey;
+        border-radius: 10px;
+        /*border: 2px solid gray;*/
+        /*box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.2); !* Add a box shadow for shading *!*/
+        box-shadow: 5px 5px 10px lightblue; /* Add a box shadow for shading */
+    }
+
+    #myChart {
+        /*height: auto;*/
+        height: 100%;
+        margin: auto; /* Center horizontally */
+        max-width: 100%;
+        width: 100%; /* Adjust width as needed */
+        height: auto;
+        /*background-color: #D3D3D3;*/
+        background-color: floralwhite;
+        border-radius: 50px;
+        margin-top: 25px;
+        /*border: 2px solid gray;*/
+        /*box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.2); !* Add a box shadow for shading *!*/
+        box-shadow: 5px 5px 10px lightblue; /* Add a box shadow for shading */
+    }
+
+    #target_vs_achievmentChartLine {
+        max-width: 100%;
+        height: auto;
+        /*background-color: #D3D3D3;*/
+        background-color: floralwhite;
+        border-radius: 15px;
+        /*border: 2px solid gray;*/
+        /*box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.2); !* Add a box shadow for shading *!*/
+        box-shadow: 5px 5px 10px lightblue; /* Add a box shadow for shading */
+    }
+
+</style>
+
+<style>
+    /* Style for the navigation spans */
+    .arrow {
+        cursor: pointer;
+        display: inline-block;
+        padding: 8px; /* Adjust padding as needed */
+        border-radius: 50%;
+        background-color: #ffffff; /* Background color for the icon */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+        transition: background-color 0.3s, transform 0.2s ease-in-out;
+    }
+
+    .arrow:hover {
+        background-color: #f0f0f0; /* Change background color on hover */
+        transform: scale(1.05); /* Add a slight scale effect on hover */
+    }
+
+    /* Style for the icon */
+    .arrow i {
+        font-size: 24px;
+        color: red;
+    }
+
+    /* Style for the monthYearText span */
+    #monthYearText {
+        font-size: 24px; /* Adjust font size as needed */
+        margin: 0 20px; /* Add spacing between the navigation elements */
+    }
+
+    /* Define a base font size for small screens */
+    .arrow i,
+    #monthYearText {
+        font-size: 12px;
+    }
+
+    /* Use media queries to adjust font size for larger screens */
+    @media screen and (min-width: 576px) {
+        .arrow i,
+        #monthYearText {
+            font-size: 18px;
+        }
+    }
+
+    @media screen and (min-width: 768px) {
+        .arrow i,
+        #monthYearText {
+            font-size: 18px;
+        }
+    }
+
+    @media screen and (min-width: 992px) {
+        .arrow i,
+        #monthYearText {
+            font-size: 18px;
+        }
+    }
+
+    @media screen and (min-width: 1200px) {
+        .arrow i,
+        #monthYearText {
+            font-size: 18px; /* Maximum size for larger screens */
+        }
+    }
+
+</style>
+<!--end: canvas calender-->
+<div class="col-sm-3">
+    <div>
+        <div id="monthSelection" style="display: none;">
+            <label for="monthSelect">Select Month:</label>
+            <select id="monthSelect" onchange="handleMonthChange()"></select>
+        </div>
+
+        <div id="yearSelection" style="display: none;">
+            <label for="yearInput">Enter Year:</label>
+            <input type="number" id="yearInput" min="1900" max="2100" oninput="handleYearChange()"/>
+        </div>
+        <div class="col-md-12" style=" text-align: center;">
+            <span onclick="goToPreviousMonth()"><i class='fas fa-angle-double-left'
+                                                   style='font-size:24px;color:red'></i></span>
+            <span id="monthYearText"></span>
+            <span class="arrow" onclick="goToNextMonth()"><i class='fas fa-angle-double-right'
+                                                             style='font-size:24px;color:red'></i></span>
+            <div>
+                <canvas id="calanderCanvas" width="500" height="400"></canvas>
+            </div>
+        </div>
+
+        <!--star: canvas calender modal-->
+        <div id="modalCalender" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <p id="modalDate"></p>
+            </div>
+        </div>
+        <!--end: canvas calender modal-->
+
+
+
+
+    </div>
+</div>
+<script>
+    document.getElementById('monthSelection').style.display = 'none';
+    document.getElementById('yearSelection').style.display = 'none';
+
+    // Get the canvas element
+    var canvas = document.getElementById("calanderCanvas");
+    var ctxCanvas = canvas.getContext("2d");
+
+    // Define the size of each cell
+    var cellWidth = canvas.width / 7;
+    var cellHeight = canvas.height / 6;
+
+    // Define the abbreviated weekday names
+    var daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+    // Get the month selection and year input elements
+    var monthSelect = document.getElementById("monthSelect");
+    var yearInput = document.getElementById("yearInput");
+
+    // Initialize the selected month and year
+    var selectedMonth = null;
+    var selectedYear = null;
+
+    // Array to store the random dates for highlighting
+    var randomDates = [];
+
+    // Function to get the number of days in a month
+    function getDaysInMonth(month, year) {
+        return new Date(year, month + 1, 0).getDate();
+    }
+
+    // Function to generate an array of 5 random dates within the selected month
+    function generateRandomDates() {
+        randomDates = [];
+        var numDays = getDaysInMonth(selectedMonth, selectedYear);
+        while (randomDates.length < 5) {
+            var randomDate = Math.floor(Math.random() * numDays) + 1;
+            if (!randomDates.includes(randomDate)) {
+                randomDates.push(randomDate);
+            }
+        }
+    }
+
+    // Function to draw the calendar
+    function drawCalendar() {
+        ctxCanvas.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Draw the top row with month and year
+        var monthName = new Date(selectedYear, selectedMonth).toLocaleString("default", {month: "long"});
+        var topRowText = monthName + " " + selectedYear;
+        var monthYearText = document.getElementById("monthYearText");
+        monthYearText.textContent = topRowText;
+        // monthYearText.style.fontSize = "36px";
+
+        // Draw the days of the week
+        ctxCanvas.fillStyle = "#000000";
+        //ctxCanvas.fillStyle = "#1abc9c";
+        ctxCanvas.font = "bold 14px Arial";
+        ctxCanvas.textAlign = "center";
+        for (var i = 0; i < 7; i++) {
+            var x = i * cellWidth + cellWidth / 2;
+            console.log(x);
+
+            // ctxCanvas.fillStyle = "#1abc9c";
+            // ctxCanvas.fillStyle = "#4ad3b7";
+            ctxCanvas.fillStyle = "cyan";
+            //ctxCanvas.fillRect(col * cellWidth, row * cellHeight + 75, cellWidth, cellHeight);
+            ctxCanvas.fillRect(x - 35, 0 - 25, cellWidth, cellHeight);
+
+            ctxCanvas.fillStyle = "#000000";
+            ctxCanvas.font = "24px Arial";
+            ctxCanvas.fillText(daysOfWeek[i], x, cellHeight / 2);
+        }
+
+        // Get the number of days in the selected month
+        var numDays = getDaysInMonth(selectedMonth, selectedYear);
+
+        // Get the first day of the month (0 = Sunday, 1 = Monday, ...)
+        var firstDay = new Date(selectedYear, selectedMonth, 1).getDay();
+
+        // var today = new Date().getDate();
+        // Draw the days of the month
+        ctxCanvas.font = "26px Arial";
+        ctxCanvas.textAlign = "center";
+        var dayCount = 1;
+        for (var row = 0; row < 6; row++) {
+            for (var col = 0; col < 7; col++) {
+                var x = col * cellWidth + cellWidth / 2;
+                var y = row * cellHeight + cellHeight / 2 + 75;
+
+                if (row === 0 && col < firstDay) {
+                    continue;
+                }
+
+                if (dayCount <= numDays) {
+                    var currentDateCanvas = dayCount;
+                    var isRandomDate = randomDates.includes(currentDateCanvas);
+
+                    //working: regular days
+                    // Fill the entire cell with red color if it contains a random date
+                    // if (isRandomDate) {
+                    //     ctxCanvas.fillStyle = "red";
+                    //     //ctxCanvas.fillRect(col * cellWidth, row * cellHeight + 75, cellWidth, cellHeight);
+                    //     ctxCanvas.fillRect(col * cellWidth, row * cellHeight + 75, cellWidth, cellHeight);
+                    // }
+
+                    //radious
+                    if (isRandomDate) {
+                        ctxCanvas.fillStyle = "red";
+                        const x = col * cellWidth;
+                        const y = row * cellHeight + 75;
+                        const width = cellWidth;
+                        const height = cellHeight;
+                        const borderRadius = 25;
+
+                        ctxCanvas.beginPath();
+                        ctxCanvas.moveTo(x + borderRadius, y);
+                        ctxCanvas.lineTo(x + width - borderRadius, y);
+                        ctxCanvas.quadraticCurveTo(x + width, y, x + width, y + borderRadius);
+                        ctxCanvas.lineTo(x + width, y + height - borderRadius);
+                        ctxCanvas.quadraticCurveTo(x + width, y + height, x + width - borderRadius, y + height);
+                        ctxCanvas.lineTo(x + borderRadius, y + height);
+                        ctxCanvas.quadraticCurveTo(x, y + height, x, y + height - borderRadius);
+                        ctxCanvas.lineTo(x, y + borderRadius);
+                        ctxCanvas.quadraticCurveTo(x, y, x + borderRadius, y);
+                        ctxCanvas.closePath();
+                        ctxCanvas.fill();
+                    }
+
+
+                    // Check if the current date is today's date
+
+                    //current date: regular cell
+                    // Set the fillStyle based on whether it's today's date or a random date
+                    // if (iscurrentDateCanvasToday(currentDateCanvas)) {
+                    //     ctxCanvas.fillStyle = "cyan"; // Set the color to cyan for today's date
+                    //     ctxCanvas.fillRect(col * cellWidth, row * cellHeight + 75, cellWidth, cellHeight)
+                    // } else {
+                    // }
+
+                    //current date: radius cell
+                    if (iscurrentDateCanvasToday(currentDateCanvas)) {
+                        ctxCanvas.fillStyle = "cyan"; // Set the color to cyan for today's date
+
+                        const x = col * cellWidth;
+                        const y = row * cellHeight + 75;
+                        const width = cellWidth;
+                        const height = cellHeight;
+                        const borderRadius = 25;
+
+                        ctxCanvas.beginPath();
+                        ctxCanvas.moveTo(x + borderRadius, y);
+                        ctxCanvas.lineTo(x + width - borderRadius, y);
+                        ctxCanvas.quadraticCurveTo(x + width, y, x + width, y + borderRadius);
+                        ctxCanvas.lineTo(x + width, y + height - borderRadius);
+                        ctxCanvas.quadraticCurveTo(x + width, y + height, x + width - borderRadius, y + height);
+                        ctxCanvas.lineTo(x + borderRadius, y + height);
+                        ctxCanvas.quadraticCurveTo(x, y + height, x, y + height - borderRadius);
+                        ctxCanvas.lineTo(x, y + borderRadius);
+                        ctxCanvas.quadraticCurveTo(x, y, x + borderRadius, y);
+                        ctxCanvas.closePath();
+                        ctxCanvas.fill();
+                    }
+
+                    ctxCanvas.fillStyle = "#000000";
+                    ctxCanvas.fillText(currentDateCanvas.toString(), x, y);
+
+                    if (isRandomDate) {
+                        // Add event listener for cell click
+                        canvas.addEventListener("click", handleDateClick);
+                    }
+
+                    dayCount++;
+                }
+            }
+        }
+    }
+
+    function iscurrentDateCanvasToday(currentDateCanvas) {
+        var today = new Date(); // Get the current date
+        var currentYear = today.getFullYear(); // Get the current year
+        var currentMonth = today.getMonth(); // Get the current month (0-11)
+        var currentDay = today.getDate(); // Get the current day of the month
+
+        var cyear = selectedYear === currentYear;
+        var cmonth = selectedMonth === currentMonth;
+        var cdate = currentDay === currentDateCanvas;
+        var isToday = cyear && cmonth && cdate;
+
+        return isToday;
+    }
+
+    // Function to handle month selection change
+    function handleMonthChange() {
+        selectedMonth = parseInt(monthSelect.value);
+        generateRandomDates();
+        drawCalendar();
+    }
+
+    // Function to handle year input change
+    function handleYearChange() {
+        selectedYear = parseInt(yearInput.value);
+        generateRandomDates();
+        drawCalendar();
+    }
+
+    // Function to handle date click event
+    function handleDateClick(event) {
+        var rect = canvas.getBoundingClientRect();
+        var mouseX = event.clientX - rect.left;
+        var mouseY = event.clientY - rect.top;
+
+        console.log('mouseX : ' + mouseX + ' mouseY : ' + mouseY);
+
+
+        var col = Math.floor(mouseX / cellWidth);
+        // var row = Math.floor((mouseY - 75) / cellHeight);
+        var row = Math.floor((mouseY) / cellHeight);
+
+        var firstDay = new Date(selectedYear, selectedMonth, 1).getDay();
+        var clickedDate = row * 7 + col - firstDay + 1;
+
+        console.log('clickedDate : ' + clickedDate);
+
+        if (clickedDate >= 1 && clickedDate <= getDaysInMonth(selectedMonth, selectedYear) && randomDates.includes(clickedDate)) {
+            var modal = document.getElementById("modalCalender");
+            var modalDate = document.getElementById("modalDate");
+            modalDate.textContent = clickedDate + " " + new Date(selectedYear, selectedMonth).toLocaleString("default", {month: "long"});
+            modal.style.display = "block";
+        }
+    }
+
+    // Function to close the modal
+    function closeModal() {
+        var modal = document.getElementById("modalCalender");
+        modal.style.display = "none";
+    }
+
+    // Function to go to the next month
+    function goToNextMonth() {
+        if (selectedMonth < 11) {
+            selectedMonth++;
+        } else {
+            selectedMonth = 0;
+            selectedYear++;
+        }
+        monthSelect.value = selectedMonth;
+        yearInput.value = selectedYear;
+        generateRandomDates();
+        drawCalendar();
+    }
+
+    // Function to go to the previous month
+    function goToPreviousMonth() {
+        if (selectedMonth > 0) {
+            selectedMonth--;
+        } else {
+            selectedMonth = 11;
+            selectedYear--;
+        }
+        monthSelect.value = selectedMonth;
+        yearInput.value = selectedYear;
+        generateRandomDates();
+        drawCalendar();
+    }
+
+    // Populate the month selection dropdown
+    for (var i = 0; i < 12; i++) {
+        var option = document.createElement("option");
+        option.value = i;
+        option.text = new Date(2000, i).toLocaleString("default", {month: "long"});
+        monthSelect.appendChild(option);
+    }
+
+    // Set the initial month and year to the current date
+    var currentDateCanvas = new Date();
+    selectedMonth = currentDateCanvas.getMonth();
+    selectedYear = currentDateCanvas.getFullYear();
+
+    // Set the initial values of the month selection and year input
+    monthSelect.value = selectedMonth;
+    yearInput.value = selectedYear;
+
+    // Generate initial random dates
+    generateRandomDates();
+
+    // Draw the initial calendar
+    drawCalendar();
+
+</script>
+</body>
+</html>

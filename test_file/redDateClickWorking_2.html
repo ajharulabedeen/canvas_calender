@@ -5,14 +5,62 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-
-    <!--start: canvas calender-->
     <style>
-        #calanderCanvas {
+        canvas {
             border: 2px solid lightgrey;
             background-color: lightcyan;
         }
 
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .arrow {
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .arrow:hover {
+            color: blue;
+        }
+    </style>
+    <!--start: canvas calender-->
+    <style>
+        /*<!--  no need cause it is adding border to all canvas -- >*/
+        /*canvas {*/
+        /*border: 1px solid black;*/
+        /*}*/
         .modal {
             display: none;
             position: fixed;
@@ -202,7 +250,7 @@
 <script>
     // Get the canvas element
     var canvas = document.getElementById("calanderCanvas");
-    var ctxCanvas = canvas.getContext("2d");
+    var ctx = canvas.getContext("2d");
 
     // Define the size of each cell
     var cellWidth = canvas.width / 7;
@@ -241,7 +289,7 @@
 
     // Function to draw the calendar
     function drawCalendar() {
-        ctxCanvas.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         // Draw the top row with month and year
         var monthName = new Date(selectedYear, selectedMonth).toLocaleString("default", {month: "long"});
@@ -250,15 +298,15 @@
         monthYearText.textContent = topRowText;
 
         // Draw the days of the week
-        ctxCanvas.fillStyle = "#000000";
-        ctxCanvas.font = "bold 18px Arial";
-        ctxCanvas.textAlign = "center";
+        ctx.fillStyle = "#000000";
+        ctx.font = "bold 18px Arial";
+        ctx.textAlign = "center";
         for (var i = 0; i < 7; i++) {
             var x = i * cellWidth + cellWidth / 2;
-            ctxCanvas.fillStyle = "cyan";
-            ctxCanvas.fillRect(x-35, 0, cellWidth, cellHeight);
-            ctxCanvas.fillStyle = "blue";
-            ctxCanvas.fillText(daysOfWeek[i], x, 40);
+            ctx.fillStyle = "cyan";
+            ctx.fillRect(x-35, 0, cellWidth, cellHeight);
+            ctx.fillStyle = "blue";
+            ctx.fillText(daysOfWeek[i], x, 40);
         }
 
         // Get the number of days in the selected month
@@ -268,8 +316,8 @@
         var firstDay = new Date(selectedYear, selectedMonth, 1).getDay();
 
         // Draw the days of the month
-        ctxCanvas.font = "16px Arial";
-        ctxCanvas.textAlign = "center";
+        ctx.font = "16px Arial";
+        ctx.textAlign = "center";
         var dayCount = 1;
         for (var row = 0; row < 6; row++) {
             for (var col = 0; col < 7; col++) {
@@ -282,37 +330,16 @@
 
                 if (dayCount <= numDays) {
                     var currentDate = dayCount;
-                    var currentDateCanvas = dayCount;
                     var isRandomDate = randomDates.includes(currentDate);
 
                     // Fill the entire cell with red color if it contains a random date
                     if (isRandomDate) {
-                        // ctxCanvas.fillStyle = "red";
-                        // ctxCanvas.fillRect(col * cellWidth, row * cellHeight + 75, cellWidth, cellHeight);
-
-                        ctxCanvas.fillStyle = "red";
-                        const x = col * cellWidth;
-                        const y = row * cellHeight + 75;
-                        const width = cellWidth;
-                        const height = cellHeight;
-                        const borderRadius = 15;
-
-                        ctxCanvas.beginPath();
-                        ctxCanvas.moveTo(x + borderRadius, y);
-                        ctxCanvas.lineTo(x + width - borderRadius, y);
-                        ctxCanvas.quadraticCurveTo(x + width, y, x + width, y + borderRadius);
-                        ctxCanvas.lineTo(x + width, y + height - borderRadius);
-                        ctxCanvas.quadraticCurveTo(x + width, y + height, x + width - borderRadius, y + height);
-                        ctxCanvas.lineTo(x + borderRadius, y + height);
-                        ctxCanvas.quadraticCurveTo(x, y + height, x, y + height - borderRadius);
-                        ctxCanvas.lineTo(x, y + borderRadius);
-                        ctxCanvas.quadraticCurveTo(x, y, x + borderRadius, y);
-                        ctxCanvas.closePath();
-                        ctxCanvas.fill();
+                        ctx.fillStyle = "red";
+                        ctx.fillRect(col * cellWidth, row * cellHeight + 75, cellWidth, cellHeight);
                     }
 
-                    ctxCanvas.fillStyle = "#000000";
-                    ctxCanvas.fillText(currentDate.toString(), x, y);
+                    ctx.fillStyle = "#000000";
+                    ctx.fillText(currentDate.toString(), x, y);
 
                     if (isRandomDate) {
                         // Add event listener for cell click
@@ -324,7 +351,6 @@
             }
         }
     }
-
 
     function isCurrentDateToday(currentDate) {
         var today = new Date(); // Get the current date
