@@ -8,6 +8,7 @@
     <style>
         canvas {
             border: 1px solid black;
+            background-color: lightcyan;
         }
 
         .modal {
@@ -54,6 +55,163 @@
             color: blue;
         }
     </style>
+    <!--start: canvas calender-->
+    <style>
+        /*<!--  no need cause it is adding border to all canvas -- >*/
+        /*canvas {*/
+        /*border: 1px solid black;*/
+        /*}*/
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .arrow {
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .arrow:hover {
+            color: blue;
+        }
+
+        /*material look*/
+        #calanderCanvas {
+            max-width: 100%;
+            height: auto;
+            /*background-color: #D3D3D3;*/
+            background-color: lightgrey;
+            border-radius: 10px;
+            /*border: 2px solid gray;*/
+            /*box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.2); !* Add a box shadow for shading *!*/
+            box-shadow: 5px 5px 10px lightblue; /* Add a box shadow for shading */
+        }
+
+        #myChart {
+            /*height: auto;*/
+            height: 100%;
+            margin: auto; /* Center horizontally */
+            max-width: 100%;
+            width: 100%; /* Adjust width as needed */
+            height: auto;
+            /*background-color: #D3D3D3;*/
+            background-color: floralwhite;
+            border-radius: 50px;
+            margin-top: 25px;
+            /*border: 2px solid gray;*/
+            /*box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.2); !* Add a box shadow for shading *!*/
+            box-shadow: 5px 5px 10px lightblue; /* Add a box shadow for shading */
+        }
+
+        #target_vs_achievmentChartLine {
+            max-width: 100%;
+            height: auto;
+            /*background-color: #D3D3D3;*/
+            background-color: floralwhite;
+            border-radius: 15px;
+            /*border: 2px solid gray;*/
+            /*box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.2); !* Add a box shadow for shading *!*/
+            box-shadow: 5px 5px 10px lightblue; /* Add a box shadow for shading */
+        }
+
+    </style>
+
+    <style>
+        /* Style for the navigation spans */
+        .arrow {
+            cursor: pointer;
+            display: inline-block;
+            padding: 8px; /* Adjust padding as needed */
+            border-radius: 50%;
+            background-color: #ffffff; /* Background color for the icon */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+            transition: background-color 0.3s, transform 0.2s ease-in-out;
+        }
+
+        .arrow:hover {
+            background-color: #f0f0f0; /* Change background color on hover */
+            transform: scale(1.05); /* Add a slight scale effect on hover */
+        }
+
+        /* Style for the icon */
+        .arrow i {
+            font-size: 24px;
+            color: red;
+        }
+
+        /* Style for the monthYearText span */
+        #monthYearText {
+            font-size: 24px; /* Adjust font size as needed */
+            margin: 0 20px; /* Add spacing between the navigation elements */
+        }
+
+        /* Define a base font size for small screens */
+        .arrow i,
+        #monthYearText {
+            font-size: 12px;
+        }
+
+        /* Use media queries to adjust font size for larger screens */
+        @media screen and (min-width: 576px) {
+            .arrow i,
+            #monthYearText {
+                font-size: 18px;
+            }
+        }
+
+        @media screen and (min-width: 768px) {
+            .arrow i,
+            #monthYearText {
+                font-size: 18px;
+            }
+        }
+
+        @media screen and (min-width: 992px) {
+            .arrow i,
+            #monthYearText {
+                font-size: 18px;
+            }
+        }
+
+        @media screen and (min-width: 1200px) {
+            .arrow i,
+            #monthYearText {
+                font-size: 18px; /* Maximum size for larger screens */
+            }
+        }
+
+    </style>
+    <!--end: canvas calender-->
 </head>
 <body>
     <div>
@@ -73,14 +231,10 @@
     </div>
 
 <div class="container-fluid">
-  <h1>Hello World!</h1>
-  <p>Resize the browser window to see the effect.</p>
-  <p>The columns will automatically stack on top of each other when the screen is less than 768px wide.</p>
   <div class="row">
-    <div class="col-sm-8" style="background-color:lavender;">.col-sm-4
+    <div class="col-sm-8" style="background-color:lavender;">
         <canvas id="myCanvas" width="500" height="400"></canvas>
     </div>
-    <div class="col-sm-4" style="background-color:lavenderblush;">.col-sm-4</div>
   </div>
 </div>
 
